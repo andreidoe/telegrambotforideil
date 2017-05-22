@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Telegram\Bot\Laravel\Facades\Telegram; 
 
 class Message extends Model {
 
@@ -13,4 +14,7 @@ class Message extends Model {
 		return $this->belongsTo('App\Models\Chat', 'foreign_key');
 	}
 
+	public function setDateAttribute($value) {
+		$this->attributes['date'] = date('Y-m-d H:i:s', $value);
+	}
 }

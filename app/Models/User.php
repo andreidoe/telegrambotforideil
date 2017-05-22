@@ -9,7 +9,6 @@ class User extends Authenticatable
 {
     use Notifiable;
 
-
     /**
      * The attributes that are mass assignable.
      *
@@ -28,5 +27,8 @@ class User extends Authenticatable
         'password', 'remember_token',
     ];
 
+    public function setNameAttribute($value) {
+        $this->attributes['name'] = ucfirst($value);
+    }
 
 }

@@ -12,14 +12,6 @@ class ChatController extends Controller {
 	    }
 
 
-	//Returns all chats
-	public function getChats() {
-		$chats = Chat::where('status', '!=', 3)->get();
-
-		return view('chats', ['chats' => $chats]);
-	}
-
-
 	public function deactivate($chatId) {
 		$chat = Chat::where('id', '=', $chatId)->update(['status' => 0]);
 

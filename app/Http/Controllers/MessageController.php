@@ -15,67 +15,56 @@ class MessageController extends Controller {
         $this->middleware('auth');
     }
 
+    public function index(App\Models\Chat $chat) {
+    	return $chat->id;
+    }
 
-	//Checks and writes messages to the DB
+	//Checks and add messages to the DB
+	/* 	Chat statuses:
+		status '0' - deactivated
+		status '1' - active
+		status '3' - deleted
+	*/
 	public function saveUpdates() {
 
 		$updates = Telegram::getUpdates();
 
-		//Iterating through updates and checking if 'chat' or 'message' record exists in DB
-		//If not, then write it into DB
 		foreach ($updates as $update) {
-			$username = $update['message']['from']['first_name'] 
-				. " " . $update['message']['from']['last_name'];
-			$user_id = $update['message']['from']['id'];
-			
-			$chat = new Chat;
-			$message = new Message; 
-
-			if (!Message::where('id', '=', $update['message']['message_id'])->exists()) {
-				if (Chat::where('user_id', '=', $user_id)->where('status', '=', 1)->exists()) {
-					$message->id = $update['message']['message_id'];
-					$message->username = $username;
-					$message->date = date('Y-m-d H:i:s', $update['message']['date']);
-					$message->text = $update['message']['text'];
-					$message->chat_id = Chat::where('user_id', '=', $user_id)->where('status', '=', 1)->value('id');				
-					$message->save(); 
-					
-				} else if (!Chat::where('user_id', '=', $user_id)->where('status', '=', 1)->exists()
-						&& Chat::where('user_id', '=', $user_id)->where('status', '!=', 3)) {
-					$chat->username = $username;
-					$chat->user_id = $user_id;
+			if (!Message::where('id', '=', array_get($update, 'message.message_id'))->exists()) {
+				
+				if (Chat::where('user_id', '=', array_get($update, 'message.from.id'))->where('status', '=', 1)->exists()) {
+					$storeMessage = $this->storeMessage($update);
+				} else {
+					$chat = new Chat;
+					$chat->username = array_get($update, 'message.from.first_name')." ".array_get($update, 'message.from.last_name');
+					$chat->user_id = array_get($update, 'message.from.id');
 					$chat->save();	
 
-					$message->id = $update['message']['message_id'];
-					$message->username = $username;
-					$message->date = date('Y-m-d H:i:s', $update['message']['date']);
-					$message->text = $update['message']['text'];
-					$message->chat_id = $chat->id;
-					$message->save(); 
+					$storeMessage = $this->storeMessage($update);
 				}
 			}
-	}
-	return redirect()->back();
-}
-
-
-	//Returns chat messages
-	public function getMessages($chatId) {
-
-		if (Message::where('chat_id', '=', $chatId)->exists() 
-			&& Chat::where('id', '=', $chatId)->where('status', '!=', 3)->exists()) {
-			$messages = Message::where('chat_id', '=', $chatId)->get(); 
-		} else {
-			return "404";
 		}
-		
-		return view('messages', ['messages' => $messages, 'chatId' => $chatId]);
+		return redirect()->back();
 	}
+
+	public function storeMessage($update) {
+    	$message = new Message;
+	    $user_id = array_get($update, 'message.chat.id');
+
+		$message->id = array_get($update, 'message.message_id');
+		$message->username = array_get($update, 'message.from.first_name')." ".array_get($update, 'message.from.last_name');
+		$message->date = array_get($update, 'message.date');
+		$message->text = array_get($update, 'message.text');
+		$message->chat_id = Chat::where('user_id', '=', $user_id)->where('status', '=', 1)->value('id');
+		$message->user_id = $user_id;
+		$message->save();	
+    }
 
 
 	//Send messages
-	public function postSendMessage(Request $request, $chatId)
-    {
+	public function postSendMessage(Request $request, $chat_id) {	
+    	$user_id = Chat::where('id', '=', $chat_id)->value('user_id');
+    	
         $rules = [
             'message' => 'required'
         ];
@@ -89,26 +78,15 @@ class MessageController extends Controller {
                 ->with('message', 'Message is required');
         }
 
-
         $response = Telegram::sendMessage([
-            'chat_id' => $chatId,
+            'chat_id' => $user_id,
             'text' => $request->get('message')
         ]);
 
-
-        $message = new Message;
-			$message->id = $response->getMessageId();
-			$message->username = 'admin';
-			$message->date = date('Y-m-d H:i:s', $response->getDate());			
-			$message->text = $request->message;
-			$message->chat_id = $chatId;
-			$message->save(); 
-
-
+        $storeMessage = $this->storeMessage(['message' => $response]);
 
         return redirect()->back()
             ->with('status', 'success')
             ->with('message', 'Message sent');
     }
-
 }

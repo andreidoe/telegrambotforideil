@@ -21,7 +21,7 @@
 	<?php endforeach ?>
 </table>
 
-<form action="/chat/{{$chatId}}/send" class="form-signin" method="post">
+<form action="/chat/{{$chat_id}}/send/" class="form-signin" method="post">
 	{{ csrf_field() }}
 	<h3 class="form-signin-heading">Send Message</h3>
 	<label for="inputText" class="sr-only">Message</label>
