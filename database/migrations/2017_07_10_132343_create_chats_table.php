@@ -15,7 +15,7 @@ class CreateChatsTable extends Migration
     {
         Schema::create('chats', function (Blueprint $table) {
         $table->increments('id');
-        $table->tinyInteger('status');
+        $table->tinyInteger('status')->default(1);
         $table->string('username');
         $table->integer('user_id');
         $table->rememberToken();
