@@ -13,15 +13,15 @@ class CreateMessagesTable extends Migration
      */
     public function up()
     {
-            Schema::create('messages', function (Blueprint $table) {
-            $table->increments('id');
-            $table->string('username');
-            $table->dateTime('date');
-            $table->text('text');
-            $table->integer('chat_id');
-            $table->integer('user_id');
-            $table->rememberToken();
-            $table->timestamps();
+        Schema::create('messages', function (Blueprint $table) {
+        $table->increments('id');
+        $table->string('username');
+        $table->dateTime('date');
+        $table->text('text');
+        $table->integer('chat_id');
+        $table->integer('user_id');
+        $table->rememberToken();
+        $table->timestamps();
         });
     }
 
