@@ -15,10 +15,6 @@ class MessageController extends Controller {
         $this->middleware('auth');
     }
 
-    public function index(App\Models\Chat $chat) {
-    	return $chat->id;
-    }
-
 	//Checks and add messages to the DB
 	/* 	Chat statuses:
 		status '0' - deactivated

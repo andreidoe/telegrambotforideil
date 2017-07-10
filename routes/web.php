@@ -12,6 +12,11 @@
 */
 Auth::routes();
 
+Route::bind('chat', function($chat) {
+	return \App\Models\Chat::findOrFail($chat);
+});
+
+
 Route::get('/', 'HomeController@index');
 
 Route::get('/admin', function () {
@@ -20,29 +25,11 @@ Route::get('/admin', function () {
 
 Route::get('/add', 'MessageController@saveUpdates');
 
+Route::get('/chat/{chat}/delete', 'ChatController@delete')->middleware('auth');
+Route::get('/chat/{chat}/deactivate', 'ChatController@deactivate')->middleware('auth');
 
-Route::get('chat', function() {
-	$chats = App\Models\Chat::where('status', '!=', 3)->get();
-	return view('chats', ['chats' => $chats]);
-})->middleware('auth');
-
-
-Route::get('/chat/{id}/deactivate', function($id) {
-	$chat = Chat::where('id', '=', $chatId)->update(['status' => 0]);
-	return redirect()->back();
-})->middleware('auth');
-
-
-Route::get('/chat/{id}/delete', function($id) {
-	$chat = Chat::where('id', '=', $chatId)->update(['status' => 3]);
-	return redirect()->back();
-})->middleware('auth');
-
-
-Route::get('chat/{id}', function ($id){
-	$chat = App\Models\Chat::find($id)->messages()->get();
-	return view('messages', ['messages' => $chat, 'chat_id' => $id]);
-})->middleware('auth');
+Route::get('/chat', 'ChatController@index')->middleware('auth');
+Route::get('/chat/{chat}', 'ChatController@show')->middleware('auth');
 
 
 Route::post('chat/{chat_id}/send/', 'MessageController@postSendMessage');
