@@ -16,11 +16,8 @@ Route::bind('chat', function($chat) {
 	return \App\Models\Chat::findOrFail($chat);
 });
 
+Route::get('/', 'HomeController@index');
 
-//Route::get('/', 'HomeController@index');
-Route::get('/', function(){
-	return User::all();
-});
 Route::get('/admin', function () {
     return view('admin');
 });
