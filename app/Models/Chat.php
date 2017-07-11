@@ -13,6 +13,6 @@ class Chat extends Model {
 	];
 	
 	public function messages() {
-		return $this->hasMany('App\Models\Message', 'foreign_key', 'id');
+		return $this->hasMany('App\Models\Message');
 	}
 }

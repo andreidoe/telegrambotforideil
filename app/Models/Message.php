@@ -11,7 +11,7 @@ class Message extends Model {
 	public $timestamps = false;
 
 	public function chat() {
-		return $this->belongsTo('App\Models\Chat', 'foreign_key', 'chat_id');
+		return $this->belongsTo('App\Models\Chat');
 	}
 
 	public function setDateAttribute($value) {
